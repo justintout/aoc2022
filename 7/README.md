@@ -12,6 +12,29 @@ We could entirely ignore the red-herring `dir`/`ls` and focus on the directory c
 I was _really_ stuck on adding sizes until I realized that directires were not uniquely named among the tree (duh!), just within their own directory. 
 A small modificaiton to how I recorded total sizes fixed my issues.  
 
+`fs` will be our main object. 
+It'll track our directory queue `fs.dirs`, the filesystem tree `tree`, and carry a few methods: 
+- `fs.dirname()`: get the name of the current directory 
+- `fs.pwd()`: get the full current path (space-separated)
+- `fs.pushd()`: push a directory to our queue, adding it to the tree if necessary (since we're guaranteed to change into a directory before listing it)
+- `fs.popd()`: move one level up in our directory queue 
+- `fs.sizes()`: total up all the directory sizes, keyed on the full path 
+
+`fs.tree` is also keyed on the full, space-separated path. 
+To get the total in `fs.sizes()`, we loop over each path in our tree doing:
+1. get the total size of the current path
+2. get the list of all paths counted at the current path (ex: `/ a b` would be `['/', '/ a', '/ a b']`)
+3. add the total size to each of the counted paths 
+
+We'll take the input and split the lines as usual, ignoring `$ ls` and `dir` lines. 
+Then, if the line starts with `$`, check if we're changing up (`..`) or down into a new directory.
+If up, `fs.popd()` up one directory; otherwise, `fs.pushd()` down to the directory.
+If the line doesn't start with `$`, it must be a file entry. 
+Add that file to the path by merging the current list of files with the new line, parsing the size as an integer in the process. 
+
+Once this process is complete, we have a completed tree to calculate sizes with. 
+Get all the directory sizes, filter for those at most 100000, and sum their sizes. 
+
 ```js
 selector = 'pre';
 fs = {
