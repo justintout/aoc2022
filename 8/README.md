@@ -67,11 +67,46 @@ input.fromTop = function() { return rotateLeft(this); };
 );
 ```
 
-Don't refresh the page!
-
 ## Part 2
 
-```js
+😈 EVIL GANG 😈
 
+`left`, `right`, `up`, and `down` all do similar things. 
+Take the whole `grid`, a `row` and `col` index, and grab an array of the trees from the tree at `[row, col]` to the edge in that direction. 
+This array is ordered from the perspective of the tree. 
+For each of those, find the first index that is at least the same height of the tree. 
+If none is found, the tree can see all the way to the edge. 
+
+`max` and `score` are obvious. 
+
+To find our answer, iterate each row of the grid, find the score for each tree, then return the highest score. 
+
+```js
+grid = document.querySelector('pre').innerText.trim().split('\n').map(r => 
+  r.split('').map(t => parseInt(t)));
+left = (grid, row, col) => 
+  (s = (g = grid[row].slice(0, col).reverse()).findIndex(v => v >= grid[row][col])) === -1 
+    ? g.length 
+    : s + 1;
+right = (grid, row, col) => 
+  (s = (g = grid[row].slice(col+1)).findIndex(v => v >= grid[row][col])) === -1 
+    ? g.length 
+    : s + 1;
+up = (grid, row, col) => 
+  (s = (g = grid.slice(0,row).map(r => r[col]).reverse()).findIndex(v => v >= grid[row][col])) === -1 
+    ? g.length 
+    : s + 1;
+down = (grid, row, col) => 
+  (s = (g = grid.slice(row+1).map(r => r[col])).findIndex(v => v>=grid[row][col])) === -1 
+    ? g.length 
+    : s + 1;
+score = (left, up, right, down) => 
+  left * up * right * down;
+max = (a) => 
+  a.sort((a,b)=>a===b?0:a<b?-1:1).reverse()[0];
+max(grid.map((trees, row) => 
+  trees.map((height, col) => 
+    score(...[left, right, up, down].map(f => 
+      f(grid, row, col))))).flat());
 ```
 
